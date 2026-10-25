@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "ng-typed-routes-ng-add",
+  "title": "ng-typed-routes ng-add schematic",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "The Angular application project to set up (defaults to the first application in angular.json).",
+      "$default": { "$source": "projectName" }
+    },
+    "routes": {
+      "type": "string",
+      "description": "Path of the routes file, relative to the workspace root. Defaults to <sourceRoot>/app/app.routes.ts."
+    },
+    "out": {
+      "type": "string",
+      "description": "Path of the generated file, relative to the workspace root. Defaults to routes.gen.ts next to the routes file."
+    },
+    "skipGenerate": {
+      "type": "boolean",
+      "default": false,
+      "description": "Do not run the first generation."
+    }
+  }
+}

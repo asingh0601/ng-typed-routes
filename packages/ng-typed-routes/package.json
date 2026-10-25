@@ -1,0 +1,81 @@
+{
+  "name": "ng-typed-routes",
+  "version": "0.0.0",
+  "description": "Type-safe routing for Angular. Generated from your existing app.routes.ts: typed links, typed params, typed navigation. A typo in a link is a compile error, not a 404.",
+  "license": "MIT",
+  "author": "Abhishek Singh",
+  "homepage": "https://github.com/abhisheksingh0601/ng-typed-routes#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abhisheksingh0601/ng-typed-routes.git"
+  },
+  "bugs": {
+    "url": "https://github.com/abhisheksingh0601/ng-typed-routes/issues"
+  },
+  "keywords": [
+    "angular",
+    "router",
+    "routing",
+    "typed",
+    "type-safe",
+    "typesafe",
+    "routes",
+    "codegen",
+    "signals",
+    "standalone",
+    "zoneless",
+    "routerLink",
+    "navigation"
+  ],
+  "bin": {
+    "ng-typed-routes": "./dist/cli/bin.js"
+  },
+  "schematics": "./dist/schematics/collection.json",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "directory": "dist",
+    "access": "public"
+  },
+  "scripts": {
+    "build": "npm run build:lib && npm run build:cli && npm run build:schematics && node ../../scripts/postbuild.mjs",
+    "build:lib": "ng-packagr -p ng-package.json",
+    "build:cli": "tsc -p cli/tsconfig.cli.json",
+    "build:schematics": "tsc -p schematics/tsconfig.schematics.json",
+    "test": "npm run test:cli && npm run test:types && npm run test:runtime",
+    "test:cli": "vitest run -c vitest.cli.config.ts",
+    "test:types": "vitest run -c vitest.types.config.ts",
+    "test:runtime": "ng test ng-typed-routes"
+  },
+  "peerDependencies": {
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/router": "^22.0.0",
+    "typescript": ">=5.5",
+    "@angular-devkit/schematics": "^22.0.0"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    },
+    "@angular-devkit/schematics": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false,
+  "types": "./dist/types/ng-typed-routes.d.ts",
+  "module": "./dist/fesm2022/ng-typed-routes.mjs",
+  "exports": {
+    "./package.json": {
+      "default": "./package.json"
+    },
+    ".": {
+      "types": "./dist/types/ng-typed-routes.d.ts",
+      "default": "./dist/fesm2022/ng-typed-routes.mjs"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": [],
+    "moduleResolution": "bundler"
+  },
+  "include": ["src/**/*.test-d.ts"]
+}

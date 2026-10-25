@@ -1,0 +1,42 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "packages",
+  "projects": {
+    "ng-typed-routes": {
+      "projectType": "library",
+      "root": "packages/ng-typed-routes",
+      "sourceRoot": "packages/ng-typed-routes/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "defaultConfiguration": "production",
+          "options": {
+            "project": "packages/ng-typed-routes/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "packages/ng-typed-routes/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "packages/ng-typed-routes/tsconfig.lib.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "packages/ng-typed-routes/tsconfig.spec.json",
+            "runner": "vitest",
+            "include": ["packages/ng-typed-routes/src/**/*.spec.ts"]
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "analytics": false,
+    "packageManager": "npm"
+  }
+}

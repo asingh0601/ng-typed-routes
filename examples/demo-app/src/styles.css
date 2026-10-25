@@ -1,0 +1,16 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+}
+body {
+  margin: 0;
+  padding: 1.5rem;
+  max-width: 48rem;
+}
+nav a {
+  margin-right: 1rem;
+}
+a.active {
+  font-weight: 700;
+  text-decoration: underline;
+}
