@@ -4,13 +4,13 @@
   "description": "Type-safe routing for Angular. Generated from your existing app.routes.ts: typed links, typed params, typed navigation. A typo in a link is a compile error, not a 404.",
   "license": "MIT",
   "author": "Abhishek Singh",
-  "homepage": "https://github.com/angx-libs/ng-typed-routes#readme",
+  "homepage": "https://github.com/asingh0601/ng-typed-routes#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/angx-libs/ng-typed-routes.git"
+    "url": "https://github.com/asingh0601/ng-typed-routes.git"
   },
   "bugs": {
-    "url": "https://github.com/angx-libs/ng-typed-routes/issues"
+    "url": "https://github.com/asingh0601/ng-typed-routes/issues"
   },
   "keywords": [
     "angular",

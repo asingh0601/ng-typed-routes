@@ -2,7 +2,7 @@
 
 Type-safe routing for Angular, generated from the `app.routes.ts` you already have. A typo in a link, a missing `:id`, a query param with the wrong value: all compile errors, not runtime 404s.
 
-**[Live demo](https://angx-libs.github.io/ng-typed-routes/)** · [npm](https://www.npmjs.com/package/ng-typed-routes)
+**[Live demo](https://asingh0601.github.io/ng-typed-routes/)** · [npm](https://www.npmjs.com/package/ng-typed-routes)
 
 ```html
 <!-- Angular today: a string, checked by nobody -->
