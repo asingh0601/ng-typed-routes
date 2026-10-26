@@ -268,12 +268,13 @@ routes.users.$id.path({ id: 1 }); // '/users/1'
 npm install
 npm run build                    # library (ng-packagr), CLI and schematic into packages/ng-typed-routes/dist
 npm test                         # generator tests, type-level tests, TestBed runtime tests
-npm run demo:generate            # regenerate examples/demo-app/src/app/routes.gen.ts
+npm run demo:generate            # regenerate examples/demo-app/src/app/routes.gen.ts (calls dist/cli/bin.js directly:
+                                 # npm only links a workspace bin that exists at install time)
 npm run demo:build               # build the demo app against the built package
 npm run demo:verify-type-errors  # proves that broken links fail the Angular compiler
 ```
 
-Releases use Changesets: run `npx changeset`, merge, and the release workflow publishes `packages/ng-typed-routes/dist` to npm. The demo is deployed to GitHub Pages from `main` by `.github/workflows/deploy-demo.yml`.
+Releases use Changesets: run `npx changeset`, merge, and the release workflow publishes `packages/ng-typed-routes/dist` to npm once the `NPM_TOKEN` secret and the `NPM_PUBLISH_ENABLED=true` repository variable are set. The demo is deployed to GitHub Pages from `main` by `.github/workflows/deploy-demo.yml`.
 
 ## Support
 

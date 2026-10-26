@@ -6,9 +6,9 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "routes:generate": "ng-typed-routes generate",
-    "routes:watch": "ng-typed-routes watch",
-    "routes:check": "ng-typed-routes check"
+    "routes:generate": "node ../../packages/ng-typed-routes/dist/cli/bin.js generate",
+    "routes:watch": "node ../../packages/ng-typed-routes/dist/cli/bin.js watch",
+    "routes:check": "node ../../packages/ng-typed-routes/dist/cli/bin.js check"
   },
   "dependencies": {
     "@angular/common": "^22.2.3",
