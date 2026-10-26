@@ -3,15 +3,40 @@ import type { Route } from '@angular/router';
 /** A value accepted for a path parameter when building a URL. */
 export type ParamValue = string | number;
 
-/** A query parameter value as Angular's router represents it. */
-export type QueryValue = string | readonly string[] | undefined;
-
 /**
- * Shape of a declared query-param type. Values must be strings (or string
- * literal unions, or string arrays) because that is what a URL carries.
- * Numbers and booleans must be parsed by the application.
+ * A query parameter value. Strings are passed through; `number`, `boolean`
+ * and arrays are stringified when navigating and parsed back by `injectQuery`
+ * using the codec the generator emits from the declared type.
  */
+export type QueryValue = string | number | boolean | readonly (string | number)[] | undefined;
+
+/** Shape of a declared query-param type (an inline object type). */
 export type QueryShape = Record<string, QueryValue>;
+
+/** Runtime hint for parsing a query param back from the URL. */
+export type QueryCodecKind = 'string' | 'number' | 'boolean' | 'string[]' | 'number[]';
+export type QueryCodec = Readonly<Record<string, QueryCodecKind>>;
+
+/** Parses a raw query value (as Angular's router delivers it) according to its declared kind. */
+export function decodeQueryValue(kind: QueryCodecKind | undefined, raw: unknown): unknown {
+  if (raw === undefined || raw === null) return undefined;
+  const first = Array.isArray(raw) ? raw[0] : raw;
+  switch (kind) {
+    case 'number': {
+      if (first === '' || first === undefined) return undefined;
+      const n = Number(first);
+      return Number.isNaN(n) ? undefined : n;
+    }
+    case 'boolean':
+      return first === 'true' || first === '' ? true : first === 'false' ? false : undefined;
+    case 'string[]':
+      return Array.isArray(raw) ? raw : [raw];
+    case 'number[]':
+      return (Array.isArray(raw) ? raw : [raw]).map(Number).filter((n) => !Number.isNaN(n));
+    default:
+      return raw;
+  }
+}
 
 /** What can be declared about a route via `satisfies TypedRoute<...>` or `meta<...>()`. */
 export interface MetaShape {
@@ -59,6 +84,8 @@ export interface RouteDef<P extends string = string, Q extends QueryShape = {}, 
   readonly outlet: string | undefined;
   /** Builds the URL path (without query string) for this route. */
   path(...args: PathArgs<P>): string;
+  /** How to parse non-string query params; emitted by the generator from the declared types. */
+  readonly queryCodec: QueryCodec | undefined;
   /** Phantom: declared query type. Never set at runtime. */
   readonly ɵquery?: Q;
   /** Phantom: declared data type. Never set at runtime. */
@@ -71,6 +98,7 @@ export interface AnyRoute {
   readonly paramNames: readonly string[];
   readonly outlet: string | undefined;
   path(...args: any[]): string;
+  readonly queryCodec?: QueryCodec | undefined;
   readonly ɵquery?: any;
   readonly ɵdata?: any;
 }
@@ -88,9 +116,10 @@ export type QueryOf<R> = R extends { readonly ɵquery?: infer Q }
 export type DataOf<R> = R extends { readonly ɵdata?: infer D } ? Exclude<D, undefined> : {};
 export type RouteHasParams<R> = HasParams<PatternOf<R>>;
 
-/** Carrier for declared metadata; produced by `meta<...>()`. Has no runtime content. */
+/** Carrier for declared metadata; produced by `meta<...>()`. Carries only the optional query codec at runtime. */
 export interface RouteMeta<M extends MetaShape = {}> {
   readonly ɵmeta?: M;
+  readonly codec?: QueryCodec;
 }
 
 type QueryOfMeta<M> = M extends { query: infer Q extends QueryShape } ? Q : {};
@@ -109,9 +138,13 @@ type DataOfMeta<M> = M extends { data: infer D } ? D : {};
  */
 export type TypedRoute<_M extends MetaShape = {}> = Route;
 
-/** Declares query/data types for a generated route. Erased at runtime. */
-export function meta<M extends MetaShape>(): RouteMeta<M> {
-  return EMPTY_META as RouteMeta<M>;
+/**
+ * Declares query/data types for a generated route. The optional `codec` tells
+ * `injectQuery` how to parse non-string query params; the generator derives it
+ * from the declared type (`{ page?: number }` → `{ page: 'number' }`).
+ */
+export function meta<M extends MetaShape>(codec?: QueryCodec): RouteMeta<M> {
+  return codec ? { codec } : (EMPTY_META as RouteMeta<M>);
 }
 const EMPTY_META: RouteMeta = Object.freeze({});
 
@@ -132,6 +165,7 @@ export function route<
     paramNames: extractParamNames(pattern) as ParamName<P>[],
     outlet: extractOutlet(pattern),
     path: ((params?: Record<string, ParamValue>) => buildPath(pattern, params)) as RouteDef<P>['path'],
+    queryCodec: _meta?.codec,
   };
   return Object.assign(def, children ?? ({} as C));
 }

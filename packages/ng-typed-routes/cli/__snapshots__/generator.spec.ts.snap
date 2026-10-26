@@ -36,9 +36,11 @@ export const routes = {
       advanced: route('/settings/:section/advanced'),
     },
   },
-  search: route('/search', {}, meta<{ query: { q?: string; sort?: 'asc' | 'desc'; tags?: string[] }; data: { title: string } }>()),
+  search: route('/search', {}, meta<{ query: { q?: string; sort?: 'asc' | 'desc'; tags?: string[]; page?: number; exact?: boolean; ids?: number[] }; data: { title: string } }>({ tags: 'string[]', page: 'number', exact: 'boolean', ids: 'number[]' })),
   aux: {
-    chat: route('/(aux:chat)'),
+    chat: route('/(aux:chat)', {
+      $room: route('/(aux:chat/:room)'),
+    }),
   },
   legal: route('/legal'),
   help: route('/help', {

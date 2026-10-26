@@ -17,7 +17,7 @@ const routes = {
     $id: route(
       '/users/:id',
       {
-        orders: route('/users/:id/orders', {}, meta<{ query: { tab?: 'open' | 'closed'; page?: string } }>()),
+        orders: route('/users/:id/orders', {}, meta<{ query: { tab?: 'open' | 'closed'; page?: number } }>({ page: 'number' })),
       },
       meta<{ data: { title: string } }>(),
     ),
@@ -83,11 +83,11 @@ describe('TypedRouter', () => {
     expect(typed.url(routes.aux.chat)).toBe('/(aux:chat)');
 
     await typed.navigate(routes.users.$id.orders, { id: 1, query: { tab: 'closed' } });
-    expect(typed.url(routes.users.$id.orders, { id: 1, query: { page: '2' }, queryParamsHandling: 'merge' })).toBe(
+    expect(typed.url(routes.users.$id.orders, { id: 1, query: { page: 2 }, queryParamsHandling: 'merge' })).toBe(
       '/users/1/orders?tab=closed&page=2',
     );
     expect(typed.url(routes.users.$id.orders, { id: 1, queryParamsHandling: 'preserve' })).toBe('/users/1/orders?tab=closed');
-    expect(typed.url(routes.users.$id.orders, { id: 1, query: { page: '2' } })).toBe('/users/1/orders?page=2');
+    expect(typed.url(routes.users.$id.orders, { id: 1, query: { page: 2 } })).toBe('/users/1/orders?page=2');
   });
 
   it('reports active routes', async () => {
@@ -119,7 +119,7 @@ describe('injectParams / injectQuery / injectData', () => {
     await harness.navigateByUrl('/users/43/orders?tab=closed&page=3');
     expect(orders.id()).toBe('43');
     expect(orders.tab()).toBe('closed');
-    expect(orders.page()).toBe('3');
+    expect(orders.page()).toBe(3);
   });
 
   it('reads the route data', async () => {

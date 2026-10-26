@@ -16,6 +16,7 @@ export const RESERVED_KEYS: ReadonlySet<string> = new Set([
   'paramNames',
   'outlet',
   'path',
+  'queryCodec',
   'ɵquery',
   'ɵdata',
 ]);
@@ -59,11 +60,17 @@ export function avoidReserved(key: string): string {
   return RESERVED_KEYS.has(key) ? key + '_' : key;
 }
 
-/** Joins an absolute parent pattern and a child path into an absolute pattern. */
+/**
+ * Joins an absolute parent pattern and a child path into an absolute pattern.
+ * A parent inside a named-outlet group (`/(aux:chat)`) keeps its children inside the parentheses.
+ */
 export function joinPattern(parent: string, path: string): string {
   const segments = splitSegments(path);
   if (segments.length === 0) {
     return parent === '' ? '/' : parent;
+  }
+  if (parent.endsWith(')')) {
+    return parent.slice(0, -1) + '/' + segments.join('/') + ')';
   }
   return (parent === '/' ? '' : parent) + '/' + segments.join('/');
 }

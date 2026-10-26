@@ -94,6 +94,8 @@ describe('generate (basic fixture)', () => {
     const routes = await evaluate(result.code);
     expect(routes['aux'].chat.pattern).toBe('/(aux:chat)');
     expect(routes['aux'].chat.outlet).toBe('aux');
+    expect(routes['aux'].chat.$room.pattern).toBe('/(aux:chat/:room)');
+    expect(routes['aux'].chat.$room.path({ room: 'a b' })).toBe('/(aux:chat/a%20b)');
   });
 
   it('builds paths with params', async () => {
@@ -103,10 +105,17 @@ describe('generate (basic fixture)', () => {
   });
 
   it('emits query and data types from satisfies TypedRoute<...>', () => {
-    expect(result.code).toContain("query: { q?: string; sort?: 'asc' | 'desc'; tags?: string[] }");
+    expect(result.code).toContain("query: { q?: string; sort?: 'asc' | 'desc'; tags?: string[]; page?: number; exact?: boolean; ids?: number[] }");
     expect(result.code).toContain('data: { title: string }');
     expect(result.code).toContain("query: { tab?: 'open' | 'closed' }");
     expect(result.code).toMatch(/^import \{ route, meta \} from 'ng-typed-routes';$/m);
+  });
+
+  it('emits a runtime codec for non-string query params', async () => {
+    expect(result.code).toContain("}>({ tags: 'string[]', page: 'number', exact: 'boolean', ids: 'number[]' })");
+    const routes = await evaluate(result.code);
+    expect(routes['search'].queryCodec).toEqual({ tags: 'string[]', page: 'number', exact: 'boolean', ids: 'number[]' });
+    expect(routes['users'].detail.orders.queryCodec).toBeUndefined();
   });
 
   it('is deterministic', () => {

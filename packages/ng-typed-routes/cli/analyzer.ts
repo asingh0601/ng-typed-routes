@@ -8,6 +8,8 @@ export interface AnalyzedRoute {
   children: AnalyzedRoute[];
   name?: string;
   queryType?: string;
+  /** Runtime parsing hints for non-string query params, derived from the declared type. */
+  queryCodec?: Record<string, string>;
   dataType?: string;
   /** `file:line` of the route object literal, for diagnostics. */
   source: string;
@@ -368,9 +370,12 @@ class Context {
           else this.warn(typeNode, "TypedRoute 'name' must be a string literal; ignored.");
           break;
         }
-        case 'query':
+        case 'query': {
           route.queryType = this.serializeType(propType, typeNode, 0);
+          const codec = this.queryCodec(propType, typeNode);
+          if (Object.keys(codec).length > 0) route.queryCodec = codec;
           break;
+        }
         case 'data':
           route.dataType = this.serializeType(propType, typeNode, 0);
           break;
@@ -378,6 +383,31 @@ class Context {
           this.warn(typeNode, `Unknown TypedRoute option '${prop.name}'; ignored.`);
       }
     }
+  }
+
+  /** `{ page?: number; all?: boolean; ids?: number[] }` → `{ page: 'number', all: 'boolean', ids: 'number[]' }`. */
+  private queryCodec(queryType: ts.Type, at: ts.Node): Record<string, string> {
+    const codec: Record<string, string> = {};
+    for (const prop of queryType.getProperties()) {
+      const kind = this.codecKind(this.propertyType(prop, at));
+      if (kind && kind !== 'string') codec[prop.name] = kind;
+    }
+    return codec;
+  }
+
+  private codecKind(type: ts.Type): string | undefined {
+    const members = type.isUnion() ? type.types.filter((t) => !(t.flags & (ts.TypeFlags.Undefined | ts.TypeFlags.Null))) : [type];
+    if (members.length === 0) return undefined;
+    const every = (pred: (t: ts.Type) => boolean) => members.every(pred);
+    if (every((t) => !!(t.flags & ts.TypeFlags.NumberLike))) return 'number';
+    if (every((t) => !!(t.flags & ts.TypeFlags.BooleanLike))) return 'boolean';
+    if (every((t) => !!(t.flags & ts.TypeFlags.StringLike))) return 'string';
+    if (every((t) => this.checker.isArrayType(t))) {
+      const elems = members.map((t) => this.checker.getTypeArguments(t as ts.TypeReference)[0]).filter(Boolean);
+      if (elems.every((e) => !!(e.flags & ts.TypeFlags.NumberLike))) return 'number[]';
+      if (elems.every((e) => !!(e.flags & ts.TypeFlags.StringLike))) return 'string[]';
+    }
+    return undefined;
   }
 
   private propertyType(prop: ts.Symbol, at: ts.Node): ts.Type {

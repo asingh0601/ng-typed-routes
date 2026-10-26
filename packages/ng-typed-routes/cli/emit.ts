@@ -66,7 +66,12 @@ function metaArg(node: TreeNode): string | undefined {
   const parts: string[] = [];
   if (node.queryType) parts.push(`query: ${node.queryType}`);
   if (node.dataType) parts.push(`data: ${node.dataType}`);
-  return `meta<{ ${parts.join('; ')} }>()`;
+  const codec = node.queryCodec
+    ? `{ ${Object.entries(node.queryCodec)
+        .map(([k, v]) => `${k}: ${quote(v)}`)
+        .join(', ')} }`
+    : '';
+  return `meta<{ ${parts.join('; ')} }>(${codec})`;
 }
 
 function hasMeta(node: TreeNode): boolean {

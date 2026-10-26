@@ -2,7 +2,7 @@ import { computed, inject, type Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, type Data, type Params } from '@angular/router';
 import { combineLatest, map } from 'rxjs';
-import type { AnyRoute, DataOf, ParamValuesOf, QueryOf } from './types';
+import { decodeQueryValue, type AnyRoute, type DataOf, type ParamValuesOf, type QueryOf } from './types';
 
 /** One `Signal<string>` per route parameter. */
 export type ParamSignals<R> = { readonly [K in keyof ParamValuesOf<R>]: Signal<string> };
@@ -47,16 +47,17 @@ export function injectParams<R extends AnyRoute>(route: R, options?: InjectOptio
  * Values are not validated at runtime: a URL can always carry a value outside
  * the declared union.
  */
-export function injectQuery<R extends AnyRoute>(_route: R, options?: InjectOptions): QuerySignals<R> {
+export function injectQuery<R extends AnyRoute>(route: R, options?: InjectOptions): QuerySignals<R> {
   const activated = options?.activatedRoute ?? inject(ActivatedRoute);
   const query = toSignal(activated.queryParams, { initialValue: activated.snapshot?.queryParams ?? {} });
+  const codec = route.queryCodec;
   const cache = new Map<string, Signal<unknown>>();
   return new Proxy({} as Record<string, Signal<unknown>>, {
     get(_target, key) {
       if (typeof key !== 'string') return undefined;
       let sig = cache.get(key);
       if (!sig) {
-        sig = computed(() => query()[key]);
+        sig = computed(() => decodeQueryValue(codec?.[key], query()[key]));
         cache.set(key, sig);
       }
       return sig;

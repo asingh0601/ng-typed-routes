@@ -25,8 +25,8 @@ export const routes: Routes = [
   {
     path: 'search',
     component: Home,
-  } satisfies TypedRoute<{ query: { q?: string; sort?: 'asc' | 'desc'; tags?: string[] }; data: { title: string } }>,
-  { path: 'chat', outlet: 'aux', component: Home },
+  } satisfies TypedRoute<{ query: { q?: string; sort?: 'asc' | 'desc'; tags?: string[]; page?: number; exact?: boolean; ids?: number[] }; data: { title: string } }>,
+  { path: 'chat', outlet: 'aux', component: Home, children: [{ path: ':room', component: Home }] },
   legal,
   ...SHARED_ROUTES,
   { path: 'old', redirectTo: 'about-us' },

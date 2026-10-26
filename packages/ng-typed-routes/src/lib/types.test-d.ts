@@ -16,7 +16,7 @@ const routes = {
   users: route('/users', {
     $id: route(
       '/users/:id',
-      { orders: route('/users/:id/orders/:orderId', {}, meta<{ query: { tab?: 'open' | 'closed' } }>()) },
+      { orders: route('/users/:id/orders/:orderId', {}, meta<{ query: { tab?: 'open' | 'closed'; page?: number } }>({ page: 'number' })) },
       meta<{ data: { title: string } }>(),
     ),
   }),
@@ -34,7 +34,7 @@ describe('pattern types', () => {
 
   it('derives params and query from a route', () => {
     expectTypeOf<ParamsOf<typeof routes.users.$id.orders>>().toEqualTypeOf<{ id: string | number; orderId: string | number }>();
-    expectTypeOf<QueryOf<typeof routes.users.$id.orders>>().toEqualTypeOf<{ tab?: 'open' | 'closed' }>();
+    expectTypeOf<QueryOf<typeof routes.users.$id.orders>>().toEqualTypeOf<{ tab?: 'open' | 'closed'; page?: number }>();
     expectTypeOf<QueryOf<typeof routes.index>>().toEqualTypeOf<{}>();
   });
 });
@@ -78,6 +78,7 @@ describe('injectParams / injectQuery', () => {
     void p.nope;
     const q = injectQuery(routes.users.$id.orders);
     expectTypeOf(q.tab).toEqualTypeOf<Signal<'open' | 'closed' | undefined>>();
+    expectTypeOf(q.page).toEqualTypeOf<Signal<number | undefined>>();
   });
 });
 

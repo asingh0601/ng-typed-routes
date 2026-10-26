@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildPath, extractOutlet, extractParamNames, meta, route } from './types';
+import { buildPath, decodeQueryValue, extractOutlet, extractParamNames, meta, route } from './types';
 import { defineRoutes, typedRoutes } from './infer';
 
 describe('route()', () => {
@@ -31,8 +31,21 @@ describe('route()', () => {
     expect(route('/(aux:chat)').path()).toBe('/(aux:chat)');
   });
 
-  it('meta() is empty at runtime', () => {
+  it('meta() carries only the codec at runtime', () => {
     expect(meta<{ query: { tab?: string } }>()).toEqual({});
+    expect(route('/x', {}, meta<{ query: { page?: number } }>({ page: 'number' })).queryCodec).toEqual({ page: 'number' });
+  });
+
+  it('decodeQueryValue parses by kind', () => {
+    expect(decodeQueryValue('number', '3')).toBe(3);
+    expect(decodeQueryValue('number', 'x')).toBeUndefined();
+    expect(decodeQueryValue('boolean', 'true')).toBe(true);
+    expect(decodeQueryValue('boolean', 'false')).toBe(false);
+    expect(decodeQueryValue('boolean', 'maybe')).toBeUndefined();
+    expect(decodeQueryValue('string[]', 'a')).toEqual(['a']);
+    expect(decodeQueryValue('number[]', ['1', 'x', '2'])).toEqual([1, 2]);
+    expect(decodeQueryValue(undefined, 'raw')).toBe('raw');
+    expect(decodeQueryValue('number', undefined)).toBeUndefined();
   });
 });
 

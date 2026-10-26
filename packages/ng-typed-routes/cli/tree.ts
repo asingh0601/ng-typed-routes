@@ -16,6 +16,7 @@ export interface TreeNode {
   pattern?: string;
   outlet?: string;
   queryType?: string;
+  queryCodec?: Record<string, string>;
   dataType?: string;
   source?: string;
   children: Map<string, TreeNode>;
@@ -68,7 +69,7 @@ function collect(
         : descend(group, segments.length ? segments : [INDEX_KEY]);
       assign(node, pattern, r, warnings, counter);
       node.outlet = r.outlet;
-      if (r.children.length) warnings.push(`${r.source}: children of named-outlet routes are not generated.`);
+      if (r.children.length > 0) collect(r.children, pattern, node, warnings, counter);
       continue;
     }
 
@@ -80,6 +81,7 @@ function collect(
         // `{ path: '' }` inside a navigable parent: the parent already is this URL.
         // Only its declared query/data are worth keeping.
         parent.queryType ??= r.queryType;
+        parent.queryCodec ??= r.queryCodec;
         parent.dataType ??= r.dataType;
       } else {
         const node = child(parent, r.name ? avoidReserved(sanitizeIdentifier(r.name)) : INDEX_KEY);
@@ -127,6 +129,7 @@ function assign(node: TreeNode, pattern: string, r: AnalyzedRoute, warnings: str
   node.pattern = pattern;
   node.source = r.source;
   node.queryType = r.queryType;
+  node.queryCodec = r.queryCodec;
   node.dataType = r.dataType;
   counter.count++;
 }
